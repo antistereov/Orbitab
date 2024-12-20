@@ -65,6 +65,9 @@ dependencies {
     // Parsing, serializing JSON
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 
+    // Validation
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+
     // CalDav
     implementation("org.mnode.ical4j:ical4j:3.2.15")
 

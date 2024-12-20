@@ -25,7 +25,7 @@ class UnsplashController(
     ): ResponseEntity<UnsplashPhoto> {
         logger.info { "Executing Unsplash getRandomPhoto" }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
 
         return ResponseEntity.ok(
             service.getRandomPhoto(userId, screenWidth, screenHeight, quality)
@@ -41,7 +41,7 @@ class UnsplashController(
     ): ResponseEntity<UnsplashPhoto> {
         logger.info { "Executing Unsplash getPhoto method with id: $id" }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
 
         return ResponseEntity.ok(
             service.getPhoto(userId, id, screenWidth, screenHeight, quality)
@@ -54,7 +54,7 @@ class UnsplashController(
     ): ResponseEntity<Map<String, String>> {
         logger.info { "Executing Unsplash likePhoto method with id: $id" }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
 
         service.likePhoto(userId, id)
 
@@ -69,7 +69,7 @@ class UnsplashController(
     ): ResponseEntity<Map<String, String>> {
         logger.info { "Executing Unsplash unlikePhoto method with id: $id" }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
         service.unlikePhoto(userId, id)
 
         return ResponseEntity.ok(

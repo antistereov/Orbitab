@@ -21,7 +21,7 @@ class SpotifyAuthController(
     suspend fun connect(): ResponseEntity<Map<String, String>> {
         logger.info { "Executing Spotify login method." }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
         val url = spotifyAuthService.getAuthorizationUrl(userId)
 
         return ResponseEntity.ok(
@@ -50,7 +50,7 @@ class SpotifyAuthController(
     suspend fun disconnect(): ResponseEntity<Any> {
         logger.info { "Executing Spotify logout method" }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
 
         return ResponseEntity.ok(
             spotifyAuthService.disconnect(userId)
@@ -61,7 +61,7 @@ class SpotifyAuthController(
     suspend fun getAccessToken(): ResponseEntity<Map<String, String>> {
         logger.info { "Fetching Spotify access token" }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
 
         val accessToken = spotifyAuthService.getAccessToken(userId)
 
@@ -74,7 +74,7 @@ class SpotifyAuthController(
     suspend fun getUserProfile(): ResponseEntity<SpotifyUserProfile?> {
         logger.info { "Fetching Spotify user profile" }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
 
         return ResponseEntity.ok(
             spotifyAuthService.getUserProfile(userId)

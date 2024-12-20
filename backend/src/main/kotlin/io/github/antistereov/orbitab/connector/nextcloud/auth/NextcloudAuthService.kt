@@ -4,7 +4,7 @@ import io.github.antistereov.orbitab.connector.nextcloud.exception.NextcloudCred
 import io.github.antistereov.orbitab.connector.nextcloud.exception.NextcloudInvalidCredentialsException
 import io.github.antistereov.orbitab.connector.shared.model.ConnectorInformation
 import io.github.antistereov.orbitab.security.AESEncryption
-import io.github.antistereov.orbitab.user.service.UserService
+import io.github.antistereov.orbitab.account.user.service.UserService
 import io.github.antistereov.orbitab.connector.nextcloud.auth.model.NextcloudUserInformation
 import io.github.antistereov.orbitab.global.component.AuthHandler
 import io.github.antistereov.orbitab.global.component.UrlHandler

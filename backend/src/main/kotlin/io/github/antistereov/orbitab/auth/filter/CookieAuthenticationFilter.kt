@@ -1,12 +1,11 @@
 package io.github.antistereov.orbitab.auth.filter
 
+import io.github.antistereov.orbitab.account.account.service.AccountService
 import io.github.antistereov.orbitab.auth.exception.InvalidTokenException
 import io.github.antistereov.orbitab.auth.service.TokenService
-import io.github.antistereov.orbitab.user.service.UserService
+import io.github.antistereov.orbitab.auth.model.CustomAuthenticationToken
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContextImpl
 import org.springframework.stereotype.Component
@@ -18,23 +17,19 @@ import reactor.core.publisher.Mono
 @Component
 class CookieAuthenticationFilter(
     private val tokenService: TokenService,
-    private val userService: UserService,
+    private val accountService: AccountService,
 ) : WebFilter {
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain) = mono {
         val authToken = extractTokenFromRequest(exchange)
 
         if (!authToken.isNullOrBlank()) {
-            val userId = tokenService.validateAccessTokenAndGetUserId(authToken)
+            val accessToken = tokenService.validateAndExtractAccessToken(authToken)
 
-            val user = userService.findByIdOrNull(userId)
+            val user = accountService.findByIdOrNull(accessToken.userId, accessToken.accountType)
                 ?: throw InvalidTokenException("Access token belongs to user that does not exist")
 
-            val roles = user.roles.map { SimpleGrantedAuthority("ROLE_$it") }
-
-            val authentication = UsernamePasswordAuthenticationToken(
-                userId, null, roles
-            )
+            val authentication = CustomAuthenticationToken(user)
 
             val securityContext = SecurityContextImpl(authentication)
             return@mono chain.filter(exchange)

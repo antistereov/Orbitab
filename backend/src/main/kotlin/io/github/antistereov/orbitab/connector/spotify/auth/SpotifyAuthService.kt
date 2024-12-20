@@ -1,8 +1,8 @@
 package io.github.antistereov.orbitab.connector.spotify.auth
 
 import io.github.antistereov.orbitab.security.AESEncryption
-import io.github.antistereov.orbitab.user.service.StateService
-import io.github.antistereov.orbitab.user.service.UserService
+import io.github.antistereov.orbitab.account.state.service.StateService
+import io.github.antistereov.orbitab.account.user.service.UserService
 import io.github.antistereov.orbitab.connector.shared.model.ConnectorInformation
 import io.github.antistereov.orbitab.connector.spotify.auth.model.SpotifyRefreshTokenResponse
 import io.github.antistereov.orbitab.connector.spotify.auth.model.SpotifyTokenResponse

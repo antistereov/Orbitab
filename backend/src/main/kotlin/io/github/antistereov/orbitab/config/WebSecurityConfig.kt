@@ -3,7 +3,7 @@ package io.github.antistereov.orbitab.config
 import io.github.antistereov.orbitab.auth.filter.CookieAuthenticationFilter
 import io.github.antistereov.orbitab.auth.filter.LoggingFilter
 import io.github.antistereov.orbitab.config.properties.FrontendProperties
-import io.github.antistereov.orbitab.user.service.UserService
+import io.github.antistereov.orbitab.account.user.service.UserService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus

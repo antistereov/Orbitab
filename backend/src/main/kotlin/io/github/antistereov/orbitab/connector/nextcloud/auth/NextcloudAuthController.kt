@@ -26,7 +26,7 @@ class NextcloudAuthController(
     ) {
         logger.info { "Executing authentication method." }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
 
         return nextcloudAuthService.authentication(userId, credentials)
     }
@@ -35,7 +35,7 @@ class NextcloudAuthController(
     suspend fun disconnect() {
         logger.info { "Executing logout method." }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
         nextcloudAuthService.logout(userId)
     }
 }

@@ -25,7 +25,7 @@ class SpotifyPlaybackController(
     suspend fun getCurrentSong(): ResponseEntity<String> {
         logger.info { "Executing Spotify getCurrentSong method." }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
 
         return ResponseEntity.ok(
             service.getCurrentlyPlaying(userId)
@@ -38,7 +38,7 @@ class SpotifyPlaybackController(
     ): ResponseEntity<String> {
         logger.info { "Executing Spotify skipToNext method" }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
 
         return ResponseEntity.ok(
             service.skipToNext(userId, deviceId)
@@ -51,7 +51,7 @@ class SpotifyPlaybackController(
     ): ResponseEntity<String> {
         logger.info { "Executing Spotify skipToPrevious method" }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
 
         return ResponseEntity.ok(
             service.skipToPrevious(userId, deviceId)
@@ -65,7 +65,7 @@ class SpotifyPlaybackController(
     ): ResponseEntity<String> {
         logger.info { "Executing Spotify seekToPosition method" }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
 
         return ResponseEntity.ok(
             service.seekToPosition(userId, positionMs, deviceId)

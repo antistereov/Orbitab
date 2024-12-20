@@ -21,7 +21,7 @@ class UnsplashAuthController(
     suspend fun connect(): ResponseEntity<Map<String, String>> {
         logger.info { "Executing Unsplash connect method." }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
         val authorizationUrl = service.getAuthorizationUrl(userId)
 
         logger.info { "Redirect URL created: $authorizationUrl" }
@@ -37,7 +37,7 @@ class UnsplashAuthController(
     ): ResponseEntity<UnsplashPublicUserProfile> {
         logger.info { "Fetching public Unsplash user profile" }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
 
         return if (refresh) {
             ResponseEntity.ok(
@@ -70,7 +70,7 @@ class UnsplashAuthController(
     suspend fun disconnect(): ResponseEntity<Any> {
         logger.info { "Executing Unsplash logout method." }
 
-        val userId = authenticationService.getCurrentUserId()
+        val userId = authenticationService.getCurrentAccountId()
 
         return ResponseEntity.ok(
             service.disconnect(userId)
