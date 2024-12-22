@@ -6,6 +6,8 @@ import io.github.antistereov.orbitab.account.guest.repository.GuestRepository
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @Service
 class GuestService(
@@ -43,5 +45,11 @@ class GuestService(
         logger.debug { "Finding guest by deviceId $deviceId" }
 
         return guestRepository.findByDeviceId(deviceId)
+    }
+
+    suspend fun deleteInactiveGuests() {
+        val thirtyDaysAgo = Instant.now().minus(30, ChronoUnit.DAYS)
+        val deletedCount = guestRepository.deleteByLastActiveBefore(thirtyDaysAgo) ?: 0L
+        logger.info { "Deleted $deletedCount inactive guests who were last active before $thirtyDaysAgo" }
     }
 }

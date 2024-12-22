@@ -1,13 +1,14 @@
 package io.github.antistereov.orbitab.account.state.service
 
-import io.github.antistereov.orbitab.security.AESEncryption
 import io.github.antistereov.orbitab.account.state.exception.InvalidStateParameterException
 import io.github.antistereov.orbitab.account.state.model.StateParameter
 import io.github.antistereov.orbitab.account.state.repository.StateRepository
-import kotlinx.coroutines.flow.*
+import io.github.antistereov.orbitab.security.AESEncryption
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.onEach
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -47,7 +48,6 @@ class StateService(
         return userId
     }
 
-    @Scheduled(fixedRate = 10*60*1000) // This will run the method every 10 minutes
     suspend fun deleteExpiredStates() {
         val currentTime = Instant.now()
         var deletedCount = 0
