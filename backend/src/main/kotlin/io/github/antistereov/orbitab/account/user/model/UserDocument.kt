@@ -1,8 +1,10 @@
-package io.github.antistereov.orbitab.account.account.model
+package io.github.antistereov.orbitab.account.user.model
 
+import io.github.antistereov.orbitab.account.account.model.AccountDocument
+import io.github.antistereov.orbitab.account.account.model.AccountType
+import io.github.antistereov.orbitab.account.account.model.Role
 import io.github.antistereov.orbitab.account.account.model.tile.Tile
 import io.github.antistereov.orbitab.account.account.model.tile.TileConfig
-import io.github.antistereov.orbitab.account.user.model.DeviceInfo
 import io.github.antistereov.orbitab.connector.shared.model.ConnectorInformation
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed
@@ -16,6 +18,8 @@ data class UserDocument(
     @Indexed(unique = true) val email: String,
     val password: String,
     override val roles: List<Role> = listOf(Role.USER),
+    val emailVerified: Boolean = false,
+    val product: Boolean = false,
     val connectors: ConnectorInformation? = null,
     val devices: List<DeviceInfo> = listOf(),
     override val lastActive: Instant = Instant.now(),

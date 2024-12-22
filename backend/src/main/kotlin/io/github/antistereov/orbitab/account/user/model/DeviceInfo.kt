@@ -3,7 +3,7 @@ package io.github.antistereov.orbitab.account.user.model
 import io.github.antistereov.orbitab.account.user.dto.DeviceInfoRequestDto
 
 data class DeviceInfo(
-    val deviceId: String,
+    val id: String,
     val tokenValue: String? = null,
     val browser: String? = null,
     val os: String? = null,
@@ -21,7 +21,7 @@ data class DeviceInfo(
 
     fun toDto(): DeviceInfoRequestDto {
         return DeviceInfoRequestDto(
-            deviceId = deviceId,
+            id = id,
             browser = browser,
             os = os,
         )

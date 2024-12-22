@@ -2,7 +2,7 @@ package io.github.antistereov.orbitab.account.user.service
 
 import io.github.antistereov.orbitab.account.account.exception.AccountDoesNotExistException
 import io.github.antistereov.orbitab.account.user.model.DeviceInfo
-import io.github.antistereov.orbitab.account.account.model.UserDocument
+import io.github.antistereov.orbitab.account.user.model.UserDocument
 import io.github.antistereov.orbitab.account.user.repository.UserRepository
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -47,7 +47,7 @@ class UserService(
         return userRepository.save(user)
     }
 
-    suspend fun delete(userId: String) {
+    suspend fun deleteById(userId: String) {
         logger.debug { "Deleting user $userId" }
 
         userRepository.deleteById(userId)
@@ -61,12 +61,12 @@ class UserService(
     }
 
     suspend fun addOrUpdateDevice(userId: String, deviceInfo: DeviceInfo): UserDocument {
-        logger.debug { "Adding or updating device ${deviceInfo.deviceId} for user $userId" }
+        logger.debug { "Adding or updating device ${deviceInfo.id} for user $userId" }
 
         val user = findById(userId)
         val updatedDevices = user.devices.toMutableList()
 
-        val existingDevice = updatedDevices.find { it.deviceId == deviceInfo.deviceId }
+        val existingDevice = updatedDevices.find { it.id == deviceInfo.id }
         if (existingDevice != null) {
             updatedDevices.remove(existingDevice)
         }
@@ -79,7 +79,7 @@ class UserService(
         logger.debug { "Deleting device $deviceId for user $userId" }
 
         val user = findById(userId)
-        val updatedDevices = user.devices.filterNot { it.deviceId == deviceId }
+        val updatedDevices = user.devices.filterNot { it.id == deviceId }
 
         return save(user.copy(devices = updatedDevices, lastActive = Instant.now()))
     }

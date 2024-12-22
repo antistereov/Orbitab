@@ -1,7 +1,7 @@
 package io.github.antistereov.orbitab.account.guest.service
 
 import io.github.antistereov.orbitab.account.account.exception.AccountDoesNotExistException
-import io.github.antistereov.orbitab.account.account.model.GuestDocument
+import io.github.antistereov.orbitab.account.guest.model.GuestDocument
 import io.github.antistereov.orbitab.account.guest.repository.GuestRepository
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -19,6 +19,12 @@ class GuestService(
         logger.debug { "Finding guest $guestId by ID" }
 
         return guestRepository.findById(guestId) ?: throw AccountDoesNotExistException(guestId)
+    }
+
+    suspend fun findByIdOrNull(guestId: String): GuestDocument? {
+        logger.debug { "Finding guest $guestId by ID" }
+
+        return guestRepository.findById(guestId)
     }
 
     suspend fun save(guest: GuestDocument): GuestDocument {

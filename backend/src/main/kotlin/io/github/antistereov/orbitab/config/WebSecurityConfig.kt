@@ -59,6 +59,7 @@ class WebSecurityConfig(
                     "/auth/todoist/callback",
                     "/auth/unsplash/callback",
                     "/auth/instagram/callback",
+                    "/user/register",
                     "/user/login",
                     "/user/refresh",
                     "/user/logout",

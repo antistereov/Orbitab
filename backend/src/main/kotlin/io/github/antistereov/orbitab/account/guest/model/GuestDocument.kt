@@ -1,5 +1,8 @@
-package io.github.antistereov.orbitab.account.account.model
+package io.github.antistereov.orbitab.account.guest.model
 
+import io.github.antistereov.orbitab.account.account.model.AccountDocument
+import io.github.antistereov.orbitab.account.account.model.AccountType
+import io.github.antistereov.orbitab.account.account.model.Role
 import io.github.antistereov.orbitab.account.account.model.tile.Tile
 import io.github.antistereov.orbitab.account.account.model.tile.TileConfig
 import org.springframework.data.annotation.Id

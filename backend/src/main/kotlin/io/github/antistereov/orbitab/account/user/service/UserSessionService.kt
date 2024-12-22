@@ -2,7 +2,7 @@ package io.github.antistereov.orbitab.account.user.service
 
 import io.github.antistereov.orbitab.account.account.exception.EmailAlreadyExistsException
 import io.github.antistereov.orbitab.account.account.model.AccountType
-import io.github.antistereov.orbitab.account.account.model.UserDocument
+import io.github.antistereov.orbitab.account.user.model.UserDocument
 import io.github.antistereov.orbitab.account.account.service.AccountSessionService
 import io.github.antistereov.orbitab.account.user.dto.DeviceInfoRequestDto
 import io.github.antistereov.orbitab.account.user.dto.LoginUserDto
@@ -10,12 +10,14 @@ import io.github.antistereov.orbitab.account.user.dto.RegisterUserDto
 import io.github.antistereov.orbitab.account.user.model.DeviceInfo
 import io.github.antistereov.orbitab.auth.exception.AuthException
 import io.github.antistereov.orbitab.auth.exception.InvalidCredentialsException
+import io.github.antistereov.orbitab.auth.model.RefreshToken
 import io.github.antistereov.orbitab.auth.properties.JwtProperties
 import io.github.antistereov.orbitab.auth.service.AuthenticationService
 import io.github.antistereov.orbitab.auth.service.HashService
 import io.github.antistereov.orbitab.auth.service.TokenService
+import io.github.antistereov.orbitab.config.Constants
 import io.github.antistereov.orbitab.config.properties.BackendProperties
-import io.github.antistereov.orbitab.service.geolocation.GeoLocationService
+import io.github.antistereov.orbitab.global.service.geolocation.GeoLocationService
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.ResponseCookie
@@ -37,8 +39,8 @@ class UserSessionService(
         get() = KotlinLogging.logger {}
 
     suspend fun checkCredentialsAndGetUserId(payload: LoginUserDto): String {
-        logger.debug { "Logging in user ${payload.username}" }
-        val user = userService.findByEmail(payload.username)
+        logger.debug { "Logging in user ${payload.email}" }
+        val user = userService.findByEmail(payload.email)
             ?: throw InvalidCredentialsException()
 
         if (!hashService.checkBcrypt(payload.password, user.password)) {
@@ -78,12 +80,12 @@ class UserSessionService(
         deviceInfoDto: DeviceInfoRequestDto,
         ipAddress: String?
     ): ResponseCookie {
-        val refreshToken = tokenService.createRefreshToken(userId, AccountType.REGISTERED, deviceInfoDto.deviceId)
+        val refreshToken = tokenService.createRefreshToken(userId, AccountType.REGISTERED, deviceInfoDto.id)
 
         val location = ipAddress?.let { geoLocationService.getLocation(it) }
 
         val deviceInfo = DeviceInfo(
-            deviceId = deviceInfoDto.deviceId,
+            id = deviceInfoDto.id,
             tokenValue = refreshToken,
             browser = deviceInfoDto.browser,
             os = deviceInfoDto.os,
@@ -102,7 +104,7 @@ class UserSessionService(
 
         userService.addOrUpdateDevice(userId, deviceInfo)
 
-        val cookie = ResponseCookie.from("refresh_token", refreshToken)
+        val cookie = ResponseCookie.from(Constants.REFRESH_TOKEN_COOKIE, refreshToken)
             .httpOnly(true)
             .sameSite("Strict")
             .path("/auth/refresh")
@@ -117,8 +119,15 @@ class UserSessionService(
     suspend fun logout(deviceId: String): UserDocument {
         val userId = authenticationService.getCurrentAccountId()
         val user = userService.findById(userId)
-        val updatedDevices = user.devices.filterNot { it.deviceId == deviceId }
+        val updatedDevices = user.devices.filterNot { it.id == deviceId }
 
         return userService.save(user.copy(devices = updatedDevices, lastActive = Instant.now()))
+    }
+
+    override suspend fun validateRefreshToken(
+        refreshToken: RefreshToken
+    ): Boolean {
+        val user = userService.findById(refreshToken.accountId)
+        return user.devices.any { it.id == refreshToken.deviceId && it.tokenValue == refreshToken.value }
     }
 }

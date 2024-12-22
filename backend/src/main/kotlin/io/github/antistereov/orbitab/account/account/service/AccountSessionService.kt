@@ -1,11 +1,12 @@
 package io.github.antistereov.orbitab.account.account.service
 
+import io.github.antistereov.orbitab.account.account.model.AccountType
 import io.github.antistereov.orbitab.auth.exception.InvalidTokenException
+import io.github.antistereov.orbitab.auth.model.RefreshToken
 import io.github.antistereov.orbitab.auth.properties.JwtProperties
 import io.github.antistereov.orbitab.auth.service.TokenService
+import io.github.antistereov.orbitab.config.Constants
 import io.github.antistereov.orbitab.config.properties.BackendProperties
-import io.github.antistereov.orbitab.account.account.model.AccountType
-import io.github.antistereov.orbitab.auth.model.RefreshToken
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.ResponseCookie
@@ -25,7 +26,7 @@ abstract class AccountSessionService(
 
         val accessToken = tokenService.createAccessToken(accountId, accountType)
 
-        val cookie = ResponseCookie.from("access_token", accessToken)
+        val cookie = ResponseCookie.from(Constants.ACCESS_TOKEN_COOKIE, accessToken)
             .httpOnly(true)
             .sameSite("Strict")
             .maxAge(jwtProperties.expiresIn)
@@ -40,7 +41,7 @@ abstract class AccountSessionService(
     fun clearAccessTokenCookie(): ResponseCookie {
         logger.debug { "Clearing access token cookie" }
 
-        val cookie = ResponseCookie.from("access_token", "")
+        val cookie = ResponseCookie.from(Constants.ACCESS_TOKEN_COOKIE, "")
             .httpOnly(true)
             .sameSite("Strict")
             .maxAge(0)
@@ -57,7 +58,7 @@ abstract class AccountSessionService(
     fun clearRefreshTokenCookie(): ResponseCookie {
         logger.debug { "Clearing refresh token cookie" }
 
-        val cookie = ResponseCookie.from("refresh_token", "")
+        val cookie = ResponseCookie.from(Constants.REFRESH_TOKEN_COOKIE, "")
             .httpOnly(true)
             .sameSite("Strict")
             .maxAge(0)
@@ -70,12 +71,20 @@ abstract class AccountSessionService(
         return cookie.build()
     }
 
+    abstract suspend fun validateRefreshToken(refreshToken: RefreshToken): Boolean
+
     suspend fun validateAndExtractRefreshToken(exchange: ServerWebExchange, deviceId: String): RefreshToken {
         logger.debug { "Validating and extracting refresh token" }
 
-        val refreshToken = exchange.request.cookies["refresh_token"]?.firstOrNull()?.value
+        val refreshTokenCookie = exchange.request.cookies[Constants.REFRESH_TOKEN_COOKIE]?.firstOrNull()?.value
             ?: throw InvalidTokenException("No refresh token provided")
 
-        return tokenService.validateAndExtractRefreshToken(refreshToken, deviceId)
+        val refreshToken = tokenService.extractRefreshToken(refreshTokenCookie, deviceId)
+
+        val validated = validateRefreshToken(refreshToken)
+
+        if (!validated) throw InvalidTokenException("Refresh token is invalid")
+
+        return refreshToken
     }
 }

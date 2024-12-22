@@ -15,6 +15,11 @@ class LoggingFilter : WebFilter {
         get() = KotlinLogging.logger {}
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+        if (exchange.attributes.containsKey("loggingProcessed")) {
+            return chain.filter(exchange)
+        }
+        exchange.attributes["loggingProcessed"] = true
+
         val request = exchange.request
         val method = request.method
         val path = request.uri.path
@@ -25,11 +30,11 @@ class LoggingFilter : WebFilter {
             .doOnSuccess {
 
                 val status = exchange.response.statusCode
-                logger.debug { "Outgoing response - $method $path - Status: $status" }
+                logger.debug { "Outgoing response - $method $path: $status" }
             }
             .onErrorResume { e ->
                 val status = exchange.response.statusCode
-                logger.warn { "Request failed    - $method $path - Status: $status - Error: ${e.message}" }
+                logger.warn { "Request failed    - $method $path: $status - Error: ${e.message}" }
                 throw e
             }
     }

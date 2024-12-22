@@ -2,8 +2,9 @@ package io.github.antistereov.orbitab.auth.filter
 
 import io.github.antistereov.orbitab.account.account.service.AccountService
 import io.github.antistereov.orbitab.auth.exception.InvalidTokenException
-import io.github.antistereov.orbitab.auth.service.TokenService
 import io.github.antistereov.orbitab.auth.model.CustomAuthenticationToken
+import io.github.antistereov.orbitab.auth.service.TokenService
+import io.github.antistereov.orbitab.config.Constants
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
@@ -21,15 +22,20 @@ class CookieAuthenticationFilter(
 ) : WebFilter {
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain) = mono {
+        if (exchange.attributes.containsKey("cookieAuthenticationProcessed")) {
+            chain.filter(exchange).awaitFirstOrNull()
+        }
+        exchange.attributes["cookieAuthenticationProcessed"] = true
+
         val authToken = extractTokenFromRequest(exchange)
 
         if (!authToken.isNullOrBlank()) {
             val accessToken = tokenService.validateAndExtractAccessToken(authToken)
 
-            val user = accountService.findByIdOrNull(accessToken.userId, accessToken.accountType)
-                ?: throw InvalidTokenException("Access token belongs to user that does not exist")
+            val account = accountService.findByIdOrNull(accessToken.accountId, accessToken.accountType)
+                ?: throw InvalidTokenException("Access token belongs to account that does not exist")
 
-            val authentication = CustomAuthenticationToken(user)
+            val authentication = CustomAuthenticationToken(account)
 
             val securityContext = SecurityContextImpl(authentication)
             return@mono chain.filter(exchange)
@@ -46,6 +52,6 @@ class CookieAuthenticationFilter(
     private fun extractTokenFromRequest(exchange: ServerWebExchange): String? {
         return exchange.request.headers["Authorization"]
             ?.firstOrNull()?.removePrefix("Bearer ")
-            ?: exchange.request.cookies["access_token"]?.firstOrNull()?.value
+            ?: exchange.request.cookies[Constants.ACCESS_TOKEN_COOKIE]?.firstOrNull()?.value
     }
 }

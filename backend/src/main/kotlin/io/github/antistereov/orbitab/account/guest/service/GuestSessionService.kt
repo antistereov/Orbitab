@@ -2,10 +2,12 @@ package io.github.antistereov.orbitab.account.guest.service
 
 import io.github.antistereov.orbitab.account.account.exception.AccountException
 import io.github.antistereov.orbitab.account.account.model.AccountType
-import io.github.antistereov.orbitab.account.account.model.GuestDocument
 import io.github.antistereov.orbitab.account.account.service.AccountSessionService
+import io.github.antistereov.orbitab.account.guest.model.GuestDocument
+import io.github.antistereov.orbitab.auth.model.RefreshToken
 import io.github.antistereov.orbitab.auth.properties.JwtProperties
 import io.github.antistereov.orbitab.auth.service.TokenService
+import io.github.antistereov.orbitab.config.Constants
 import io.github.antistereov.orbitab.config.properties.BackendProperties
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -38,7 +40,7 @@ class GuestSessionService(
     suspend fun createRefreshTokenCookie(guestId: String, deviceId: String): ResponseCookie {
         val refreshToken = tokenService.createRefreshToken(guestId, AccountType.GUEST, deviceId)
 
-        val cookie = ResponseCookie.from("refresh_token", refreshToken)
+        val cookie = ResponseCookie.from(Constants.REFRESH_TOKEN_COOKIE, refreshToken)
             .httpOnly(true)
             .sameSite("Strict")
             .path("/auth/refresh")
@@ -57,4 +59,9 @@ class GuestSessionService(
         return guestService.deleteById(guestId)
     }
 
+    override suspend fun validateRefreshToken(refreshToken: RefreshToken): Boolean {
+        val guest = guestService.findById(refreshToken.accountId)
+
+        return refreshToken.deviceId == guest.deviceId && guest.refreshToken == refreshToken.value
+    }
 }

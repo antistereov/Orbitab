@@ -12,7 +12,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
     return next(authReq).pipe(
         catchError((error: HttpErrorResponse) => {
-            if (error.status === 401 && !req.url.includes('/user/refresh')) {
+            if (error.status === 401 && !req.url.includes('/refresh')) {
                 return authService.refreshToken().pipe(
                     switchMap(() => {
                         const refreshedReq = req.clone({
@@ -21,8 +21,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                         return next(refreshedReq);
                     }),
                     catchError((refreshError) => {
-                        authService.logout();
-                        return throwError(() => refreshError);
+                        authService.logout().then();
+                        return authService.loginOrRegisterGuest().pipe(
+                            switchMap(() => {
+                                const refreshedReq = req.clone({
+                                    withCredentials: true
+                                });
+                                return next(refreshedReq);
+                            })
+                        );
                     })
                 );
             }

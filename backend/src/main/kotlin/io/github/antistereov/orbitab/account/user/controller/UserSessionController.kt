@@ -1,14 +1,15 @@
 package io.github.antistereov.orbitab.account.user.controller
 
 import io.github.antistereov.orbitab.account.account.dto.AuthInfo
+import io.github.antistereov.orbitab.account.account.model.AccountDocument
 import io.github.antistereov.orbitab.account.account.model.AccountType
-import io.github.antistereov.orbitab.auth.service.AuthenticationService
+import io.github.antistereov.orbitab.account.user.dto.DeviceInfoRequestDto
 import io.github.antistereov.orbitab.account.user.dto.LoginUserDto
 import io.github.antistereov.orbitab.account.user.dto.RegisterUserDto
-import io.github.antistereov.orbitab.account.user.dto.DeviceInfoRequestDto
 import io.github.antistereov.orbitab.account.user.model.DeviceInfo
 import io.github.antistereov.orbitab.account.user.service.UserService
 import io.github.antistereov.orbitab.account.user.service.UserSessionService
+import io.github.antistereov.orbitab.auth.service.AuthenticationService
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.Valid
@@ -26,6 +27,13 @@ class UserSessionController(
 
     private val logger: KLogger
         get() = KotlinLogging.logger {}
+
+    @GetMapping("/me")
+    suspend fun getAccount(): ResponseEntity<AccountDocument> {
+        val accountId = authenticationService.getCurrentAccountId()
+
+        return ResponseEntity.ok(userService.findById(accountId))
+    }
 
     @PostMapping("/login")
     suspend fun login(
@@ -74,7 +82,7 @@ class UserSessionController(
         val clearAccessTokenCookie = userSessionService.clearAccessTokenCookie()
         val clearRefreshTokenCookie = userSessionService.clearRefreshTokenCookie()
 
-        userSessionService.logout(deviceInfo.deviceId)
+        userSessionService.logout(deviceInfo.id)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearAccessTokenCookie.toString())
@@ -91,7 +99,7 @@ class UserSessionController(
 
         val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
 
-        val refreshToken = userSessionService.validateAndExtractRefreshToken(exchange, deviceInfoDto.deviceId)
+        val refreshToken = userSessionService.validateAndExtractRefreshToken(exchange, deviceInfoDto.id)
 
         val newAccessToken = userSessionService.createAccessTokenCookie(refreshToken.accountId, AccountType.REGISTERED)
         val newRefreshToken = userSessionService.createRefreshTokenCookie(refreshToken.accountId, deviceInfoDto, ipAddress)
@@ -122,5 +130,20 @@ class UserSessionController(
         return ResponseEntity.ok(
             mapOf("devices" to updatedUser.devices.map { it.toDto() })
         )
+    }
+
+    @DeleteMapping("/me")
+    suspend fun deleteAccount(): ResponseEntity<Map<String, String>> {
+        val userId = authenticationService.getCurrentAccountId()
+
+        val clearAccessTokenCookie = userSessionService.clearAccessTokenCookie()
+        val clearRefreshTokenCookie = userSessionService.clearRefreshTokenCookie()
+
+        userService.deleteById(userId)
+
+        return ResponseEntity.ok()
+            .header("Set-Cookie", clearAccessTokenCookie.toString())
+            .header("Set-Cookie", clearRefreshTokenCookie.toString())
+            .body(mapOf("message" to "User account deleted successfully"))
     }
 }

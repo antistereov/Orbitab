@@ -1,6 +1,6 @@
 package io.github.antistereov.orbitab.account.guest.repository
 
-import io.github.antistereov.orbitab.account.account.model.GuestDocument
+import io.github.antistereov.orbitab.account.guest.model.GuestDocument
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 
 interface GuestRepository : CoroutineCrudRepository<GuestDocument, String> {

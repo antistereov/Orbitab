@@ -1,6 +1,6 @@
-package io.github.antistereov.orbitab.service.geolocation
+package io.github.antistereov.orbitab.global.service.geolocation
 
-import io.github.antistereov.orbitab.service.geolocation.model.GeoLocationResponse
+import io.github.antistereov.orbitab.global.service.geolocation.model.GeoLocationResponse
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody

@@ -1,7 +1,7 @@
 package io.github.antistereov.orbitab.account.user.dto
 
 data class LoginUserDto(
-    val username: String,
+    val email: String,
     val password: String,
     val device: DeviceInfoRequestDto
 )

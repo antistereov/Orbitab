@@ -19,10 +19,11 @@ repositories {
 }
 
 val kotlinVersion = "1.9.22"
-val springBootVersion = "3.3.0"
+val springBootVersion = "3.4.1"
 val springSecurityVersion = "6.2.1"
-val log4jVersion = "2.20.0"
+val log4jVersion = "2.24.3"
 val jacksonVersion = "2.16.0"
+val testContainersVersion = "1.19.0"
 
 dependencies {
     // Logging
@@ -58,10 +59,17 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // Tests
-    testImplementation("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:$springBootVersion") {
+        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+        exclude(group = "org.mockito")
+    }
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testImplementation("io.mockk:mockk:1.13.13")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.0")
+    testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
+    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
+    testImplementation("org.testcontainers:mongodb:$testContainersVersion")
+
 
     // Parsing, serializing JSON
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")

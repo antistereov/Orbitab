@@ -1,4 +1,4 @@
-package io.github.antistereov.orbitab.service.geolocation.model
+package io.github.antistereov.orbitab.global.service.geolocation.model
 
 data class GeoLocationResponse(
     val ipVersion: Int,

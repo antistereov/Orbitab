@@ -10,6 +10,15 @@ Seamlessly blending functionality with elegance, Orbitab empowers you to:
 
 Whether you're planning your day, tracking tasks, or seeking a moment of inspiration, Orbitab ensures your most important information is always within reach—organized, stylish, and effortless.
 
+## Getting Started
+
+### Secret Keys
+
+Before we start, we need to generate two keys:
+
+- **JWT Secret:** Go to https://jwtsecret.com/generate 
+- **Encryption Key:** Go to https://generate-random.org/encryption-key-generator?count=1&bytes=32&cipher=aes-256-cbc&string=&password= and copy the Base64 value
+
 ## Resources
 
 ### Frontend
