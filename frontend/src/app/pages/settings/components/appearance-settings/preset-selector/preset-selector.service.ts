@@ -15,6 +15,10 @@ export class PresetSelectorService {
     preset$ = this.presetSubject.asObservable();
 
     constructor(private accentColorService: AccentColorSelectorService) {
+        this.initialize();
+    }
+
+    initialize() {
         this.applyPreset(this.presetSubject.value);
     }
 

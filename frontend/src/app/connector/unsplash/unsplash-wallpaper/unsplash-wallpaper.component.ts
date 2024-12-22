@@ -44,8 +44,6 @@ export class UnsplashWallpaperComponent implements OnInit {
             this.userLink = currentWallpaper?.user.link;
             this.photoLink = currentWallpaper?.link;
         })
-
-        this.unsplashWallpaperService.setCurrentWallpaper().then();
     }
 
     nextWallpaper() {

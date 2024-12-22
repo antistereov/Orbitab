@@ -12,6 +12,10 @@ export class ThemeSelectorService {
     isDarkModeSubject$ = this.isDarkModeSubject.asObservable();
 
     constructor() {
+        this.initialize();
+    }
+
+    initialize() {
         this.applyTheme(this.themeSubject.value);
         this.detectColorScheme();
     }

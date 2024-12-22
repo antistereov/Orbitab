@@ -7,6 +7,7 @@ import {provideHttpClient, withFetch, withInterceptors} from '@angular/common/ht
 import {authInterceptor} from './interceptor/auth.interceptor';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {provideAnimations} from '@angular/platform-browser/animations';
+import {provideTranslateService} from './translate/translate-provider';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -18,6 +19,8 @@ export const appConfig: ApplicationConfig = {
         ),
         provideAnimationsAsync(),
         provideAnimations(),
-        provideClientHydration()
+        provideClientHydration(),
+        provideHttpClient(),
+        provideTranslateService(),
     ]
 };

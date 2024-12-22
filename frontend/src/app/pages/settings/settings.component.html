@@ -1,6 +1,5 @@
-<p-drawer
-    [(visible)]="isVisible"
-    [dismissible]="false"
+
+<p-card
     class="bg-opacity-70 border-none shadow-none"
 >
     <h2 class="text-3xl font-semibold">Settings</h2>
@@ -18,11 +17,10 @@
     <p-divider />
     <p class="font-semibold text-lg">Spotify</p>
     <app-spotify-auth></app-spotify-auth>
-</p-drawer>
 
-<p-button
-    (click)="open()"
-    icon="pi pi-cog"
-    class="mt-4 ml-4"
->
-</p-button>
+    <p-button
+        (onClick)="navigateToHome()"
+        icon="pi pi-times"
+    >
+    </p-button>
+</p-card>

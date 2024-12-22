@@ -1,5 +1,6 @@
 package io.github.antistereov.orbitab.auth.service
 
+import io.github.antistereov.orbitab.account.account.exception.AccountException
 import io.github.antistereov.orbitab.account.account.model.AccountType
 import io.github.antistereov.orbitab.account.account.service.AccountService
 import io.github.antistereov.orbitab.auth.exception.AccessTokenExpiredException
@@ -49,8 +50,12 @@ class TokenService(
 
         val accountId = jwt.subject
             ?: throw InvalidTokenException("JWT does not contain sub")
-        val accountType = jwt.claims["account_type"] as? AccountType
-            ?: throw InvalidTokenException("JWT does not contain valid account type")
+        println(jwt.claims["account_type"])
+        val accountType = try {
+            AccountType.fromString(jwt.claims["account_type"].toString())
+        } catch(e: AccountException) {
+            throw InvalidTokenException("JWT does not contain valid account type", e)
+        }
 
         return AccessToken(accountId, accountType)
     }
@@ -75,8 +80,11 @@ class TokenService(
 
         val accountId = jwt.subject
             ?: throw InvalidTokenException("Refresh token does not contain user id")
-        val accountType = jwt.claims["account_type"] as? AccountType
-            ?: throw InvalidTokenException("JWT does not contain valid account type")
+        val accountType = try {
+            AccountType.fromString(jwt.claims["account_type"].toString())
+        } catch(e: AccountException) {
+            throw InvalidTokenException("JWT does not contain valid account type", e)
+        }
 
         accountService.validateRefreshToken(accountId, accountType, refreshToken, deviceId)
 

@@ -1,5 +1,7 @@
 package io.github.antistereov.orbitab.account.account.model
 
+import io.github.antistereov.orbitab.account.account.model.tile.Tile
+import io.github.antistereov.orbitab.account.account.model.tile.TileConfig
 import io.github.antistereov.orbitab.account.user.model.DeviceInfo
 import io.github.antistereov.orbitab.connector.shared.model.ConnectorInformation
 import org.springframework.data.annotation.Id
@@ -17,4 +19,5 @@ data class UserDocument(
     val connectors: ConnectorInformation? = null,
     val devices: List<DeviceInfo> = listOf(),
     override val lastActive: Instant = Instant.now(),
+    override val tiles: List<Tile<TileConfig>> = listOf(),
 ) : AccountDocument()

@@ -1,51 +1,90 @@
-import {inject, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {catchError, map, Observable, of} from "rxjs";
+import {BehaviorSubject, firstValueFrom, Observable, of} from "rxjs";
+import {environment} from '../../environment/environment';
+import {DeviceService} from '../services/device.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AuthService {
-    httpClient = inject(HttpClient);
-    baseUrl = 'http://localhost:8000';
+    private authInfoSubject = new BehaviorSubject<AuthInfo | undefined>(undefined);
+    authInfo$ = this.authInfoSubject.asObservable();
+    private baseUrl = environment.baseUrl;
 
-    login(data: any): Observable<any> {
+
+    constructor(
+        private httpClient: HttpClient,
+        private deviceService: DeviceService
+    ) {}
+
+    async initializeAuthInfo(): Promise<void> {
+        await this.fetchAuthInfo();
+    }
+
+    loginOrRegisterGuest(): Observable<any> {
+        const authInfo = this.authInfoSubject.value;
+        if (authInfo) {
+            return this.httpClient.post<any>(`${this.baseUrl}/guest/login`, this.deviceService.getDeviceInfo())
+        } else {
+            return of(undefined)
+        }
+    }
+
+    loginUser(data: any): Observable<void> {
         const payload = {
             ...data,
-            deviceInfoDto: {
-                deviceId: this.getDeviceId(),
-            }
+            device: this.deviceService.getDeviceInfo()
         };
 
-        return this.httpClient.post<any>(`${this.baseUrl}/auth/login`, payload);
+        return this.httpClient.post<any>(`${this.baseUrl}/user/login`, payload);
     }
 
-    logout(): Observable<any> {
-        return this.httpClient.post(`${this.baseUrl}/auth/logout`, {}).pipe(
-            map(() => {
-                localStorage.clear();
-                sessionStorage.clear();
-            })
-        );
-    }
-
-    isLoggedIn(): Observable<boolean> {
-        return this.httpClient.get<{ status: string }>(`${this.baseUrl}/auth/check`).pipe(
-            map((response) => response.status === 'authenticated'),
-            catchError(() => of(false))
-        );
-    }
-
-    private getDeviceId(): string {
-        let deviceId = localStorage.getItem('device_id');
-        if (!deviceId) {
-            deviceId = 'device-' + Math.random().toString(36).substring(2) + Date.now().toString(36);
-            localStorage.setItem('device_id', deviceId);
+    async logout(): Promise<void> {
+        const authInfo = await this.getAuthInfo();
+        if (authInfo) {
+            const accountType = authInfo.account_type
+            switch (accountType) {
+                case "GUEST" :
+                    return await firstValueFrom(
+                        this.httpClient.post<any>(`${this.baseUrl}/guest/logout`, this.deviceService.getDeviceInfo())
+                    )
+                case "REGISTERED":
+                    return await firstValueFrom(
+                        this.httpClient.post<any>(`${this.baseUrl}/user/logout`, this.deviceService.getDeviceInfo())
+                    )
+            }
         }
-        return deviceId;
+    }
+
+    async getAuthInfo(): Promise<AuthInfo | undefined> {
+        return this.authInfoSubject.value;
+    }
+
+    private async fetchAuthInfo(): Promise<AuthInfo> {
+        const authInfo = await firstValueFrom(this.httpClient.get<AuthInfo>(`${this.baseUrl}/account/check`));
+        this.authInfoSubject.next(authInfo);
+        return authInfo;
     }
 
     refreshToken(): Observable<any> {
-        return this.httpClient.post(`${this.baseUrl}/auth/refresh`, { deviceId: this.getDeviceId() });
+        const authInfo = this.authInfoSubject.value;
+        if (authInfo) {
+            const accountType = authInfo.account_type;
+            switch (accountType) {
+                case "GUEST":
+                    return this.httpClient.post<any>(`${this.baseUrl}/guest/refresh`, this.deviceService.getDeviceInfo())
+                case "REGISTERED":
+                    return this.httpClient.post<any>(`${this.baseUrl}/user/refresh`, this.deviceService.getDeviceInfo())
+            }
+        } else {
+            return of(undefined);
+        }
     }
+}
+
+export interface AuthInfo {
+    account_id: string;
+    account_type: "GUEST" | "REGISTERED";
+    authenticated: boolean;
 }

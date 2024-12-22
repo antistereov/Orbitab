@@ -59,10 +59,13 @@ class WebSecurityConfig(
                     "/auth/todoist/callback",
                     "/auth/unsplash/callback",
                     "/auth/instagram/callback",
-                    "/auth/login",
-                    "/auth/refresh",
-                    "/auth/logout",
-                    "/auth/check",
+                    "/user/login",
+                    "/user/refresh",
+                    "/user/logout",
+                    "/guest/login",
+                    "/guest/refresh",
+                    "/guest/logout",
+                    "/account/check",
                 ).permitAll()
                 it.anyExchange().authenticated()
             }

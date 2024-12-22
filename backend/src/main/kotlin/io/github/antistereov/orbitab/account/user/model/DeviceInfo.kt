@@ -4,7 +4,7 @@ import io.github.antistereov.orbitab.account.user.dto.DeviceInfoRequestDto
 
 data class DeviceInfo(
     val deviceId: String,
-    val tokenValue: String,
+    val tokenValue: String? = null,
     val browser: String? = null,
     val os: String? = null,
     val issuedAt: Long,

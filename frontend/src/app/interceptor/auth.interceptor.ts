@@ -12,7 +12,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
     return next(authReq).pipe(
         catchError((error: HttpErrorResponse) => {
-            if (error.status === 401 && !req.url.includes('/auth/refresh')) {
+            if (error.status === 401 && !req.url.includes('/user/refresh')) {
                 return authService.refreshToken().pipe(
                     switchMap(() => {
                         const refreshedReq = req.clone({

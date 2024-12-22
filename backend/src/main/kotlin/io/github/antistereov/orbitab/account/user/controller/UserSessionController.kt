@@ -1,5 +1,6 @@
 package io.github.antistereov.orbitab.account.user.controller
 
+import io.github.antistereov.orbitab.account.account.dto.AuthInfo
 import io.github.antistereov.orbitab.account.account.model.AccountType
 import io.github.antistereov.orbitab.auth.service.AuthenticationService
 import io.github.antistereov.orbitab.account.user.dto.LoginUserDto
@@ -30,19 +31,19 @@ class UserSessionController(
     suspend fun login(
         exchange: ServerWebExchange,
         @RequestBody payload: LoginUserDto
-    ): ResponseEntity<Map<String, String>> {
+    ): ResponseEntity<AuthInfo> {
         logger.info { "Executing login" }
 
         val userId = userSessionService.checkCredentialsAndGetUserId(payload)
 
-        return generateTokensAndLogin(exchange, userId, payload.deviceInfoDto)
+        return generateTokensAndLogin(exchange, userId, payload.device)
     }
 
     @PostMapping("/register")
     suspend fun register(
         exchange: ServerWebExchange,
         @RequestBody @Valid payload: RegisterUserDto
-    ): ResponseEntity<Map<String, String>> {
+    ): ResponseEntity<AuthInfo> {
         logger.info { "Executing register" }
 
         val userId = userSessionService.registerUserAndGetUserId(payload)
@@ -54,7 +55,7 @@ class UserSessionController(
         exchange: ServerWebExchange,
         userId: String,
         deviceInfo: DeviceInfoRequestDto,
-    ): ResponseEntity<Map<String, String>> {
+    ): ResponseEntity<AuthInfo> {
         val ipAddress = exchange.request.remoteAddress?.address?.hostAddress
 
         val accessTokenCookie = userSessionService.createAccessTokenCookie(userId, AccountType.REGISTERED)
@@ -63,22 +64,17 @@ class UserSessionController(
         return ResponseEntity.ok()
             .header("Set-Cookie", accessTokenCookie.toString())
             .header("Set-Cookie", refreshTokenCookie.toString())
-            .body(mapOf(
-                "account_id" to userId,
-                "account_type" to AccountType.REGISTERED.toString(),
-                "access_token" to accessTokenCookie.value,
-                "refresh_token" to refreshTokenCookie.value
-            ))
+            .body(AuthInfo(userId, AccountType.REGISTERED, true))
     }
 
     @PostMapping("/logout")
-    suspend fun logout(@RequestParam deviceId: String): ResponseEntity<Map<String, String>> {
+    suspend fun logout(@RequestBody deviceInfo: DeviceInfo): ResponseEntity<Map<String, String>> {
         logger.info { "Executing logout" }
 
         val clearAccessTokenCookie = userSessionService.clearAccessTokenCookie()
         val clearRefreshTokenCookie = userSessionService.clearRefreshTokenCookie()
 
-        userSessionService.logout(deviceId)
+        userSessionService.logout(deviceInfo.deviceId)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", clearAccessTokenCookie.toString())

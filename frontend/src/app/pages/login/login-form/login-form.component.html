@@ -1,19 +1,33 @@
-<p-card header="Login" class="m-4">
+<p-card header="{{ 'login' | translate }}" class="m-4">
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col items-center">
         <p-inputgroup class="mb-3">
             <p-inputgroup-addon>
-                <i class="pi pi-user"></i>
+                <i class="pi pi-envelope"></i>
             </p-inputgroup-addon>
-            <input pInputText formControlName="username" placeholder="Username" [ngClass]="{'ng-invalid ng-dirty': form.getError('invalid')}" [disabled]="loading" />
+            <input
+                pInputText
+                formControlName="username"
+                type="email"
+                placeholder="{{ 'email' | translate }}"
+                [ngClass]="{'ng-invalid ng-dirty': form.getError('invalid')}"
+                [disabled]="loading"
+            />
         </p-inputgroup>
         <p-inputgroup class="mb-3">
             <p-inputgroup-addon>
                 <i class="pi pi-lock"></i>
             </p-inputgroup-addon>
-            <input pInputText formControlName="password" type="password" placeholder="Password" [ngClass]="{'ng-invalid ng-dirty': form.getError('invalid')}" [disabled]="loading" />
+            <input
+                pInputText
+                formControlName="password"
+                type="password"
+                placeholder="{{ 'password' | translate }}"
+                [ngClass]="{'ng-invalid ng-dirty': form.getError('invalid')}"
+                [disabled]="loading"
+            />
         </p-inputgroup>
 
-        <p-button type="submit" [disabled]="loading">Submit</p-button>
+        <p-button type="submit" [disabled]="loading">{{ 'login' | translate }}</p-button>
 
         <p class="invalid-password" *ngIf="form.getError('invalid')">Wrong credentials.</p>
     </form>

@@ -9,6 +9,7 @@ import {UnsplashPhoto} from '../unsplash-photo/unsplash-photo.model';
     providedIn: 'root'
 })
 export class UnsplashWallpaperService {
+    private initializedSubject = new BehaviorSubject<boolean>(false);
     private isFirstSubject = new BehaviorSubject<boolean>(false);
     isFirst$ = this.isFirstSubject.asObservable();
     private isLastSubject = new BehaviorSubject<boolean>(false);
@@ -21,7 +22,11 @@ export class UnsplashWallpaperService {
         private unsplashPhotoService: UnsplashPhotoService,
         private wallpaperService: WallpaperService,
     ) {
-        this.setCurrentWallpaper().then()
+        if (!this.initializedSubject.value) {
+            this.setCurrentWallpaper().then(() => {
+                this.initializedSubject.next(true);
+            })
+        }
     }
 
     async setCurrentWallpaper() {

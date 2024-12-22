@@ -10,6 +10,14 @@ export class AccentColorSelectorService {
     private accentColorSubject = new BehaviorSubject<AccentColor>(this.getInitialAccentColor());
     accentColor$ = this.accentColorSubject.asObservable();
 
+    constructor() {
+        this.initialize();
+    }
+
+    initialize() {
+        this.applyAccentColor(this.accentColorSubject.value);
+    }
+
     setAccentColor(accentColor: AccentColor) {
         this.accentColorSubject.next(accentColor);
         localStorage.setItem('accent-color', accentColor);

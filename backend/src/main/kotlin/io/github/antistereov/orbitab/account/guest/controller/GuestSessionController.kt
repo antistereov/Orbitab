@@ -1,15 +1,14 @@
 package io.github.antistereov.orbitab.account.guest.controller
 
+import io.github.antistereov.orbitab.account.account.dto.AuthInfo
 import io.github.antistereov.orbitab.account.account.model.AccountType
 import io.github.antistereov.orbitab.account.guest.service.GuestSessionService
+import io.github.antistereov.orbitab.account.user.model.DeviceInfo
 import io.github.antistereov.orbitab.auth.service.AuthenticationService
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
 
 @RestController
@@ -23,23 +22,18 @@ class GuestSessionController(
         get() = KotlinLogging.logger {}
 
     @PostMapping("/login")
-    suspend fun loginOrRegister(@RequestParam deviceId: String): ResponseEntity<Map<String, String>> {
+    suspend fun loginOrRegister(@RequestBody deviceInfo: DeviceInfo): ResponseEntity<AuthInfo> {
         logger.info { "Executing login or register" }
 
-        val guestId = guestSessionService.loginOrRegisterGuestAndGetGuestId(deviceId)
+        val guestId = guestSessionService.loginOrRegisterGuestAndGetGuestId(deviceInfo.deviceId)
 
         val accessTokenCookie = guestSessionService.createAccessTokenCookie(guestId, AccountType.GUEST)
-        val refreshTokenCookie = guestSessionService.createRefreshTokenCookie(guestId, deviceId)
+        val refreshTokenCookie = guestSessionService.createRefreshTokenCookie(guestId, deviceInfo.deviceId)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", accessTokenCookie.toString())
             .header("Set-Cookie", refreshTokenCookie.toString())
-            .body(mapOf(
-                "account_id" to guestId,
-                "account_type" to AccountType.GUEST.toString(),
-                "access_token" to accessTokenCookie.value,
-                "refresh_token" to refreshTokenCookie.value
-            ))
+            .body(AuthInfo(guestId, AccountType.GUEST, true))
     }
 
     @PostMapping("/logout")
@@ -61,14 +55,14 @@ class GuestSessionController(
     @PostMapping("/refresh")
     suspend fun refresh(
         exchange: ServerWebExchange,
-        @RequestParam deviceId: String
+        @RequestBody deviceInfo: DeviceInfo
     ): ResponseEntity<Map<String, String>> {
         logger.debug { "Refreshing access token" }
 
-        val refreshToken = guestSessionService.validateAndExtractRefreshToken(exchange, deviceId)
+        val refreshToken = guestSessionService.validateAndExtractRefreshToken(exchange, deviceInfo.deviceId)
 
         val newAccessToken = guestSessionService.createAccessTokenCookie(refreshToken.accountId, AccountType.GUEST)
-        val newRefreshToken = guestSessionService.createRefreshTokenCookie(refreshToken.accountId, deviceId)
+        val newRefreshToken = guestSessionService.createRefreshTokenCookie(refreshToken.accountId, deviceInfo.deviceId)
 
         return ResponseEntity.ok()
             .header("Set-Cookie", newAccessToken.toString())

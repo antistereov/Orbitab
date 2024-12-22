@@ -1,5 +1,6 @@
 package io.github.antistereov.orbitab.account.account.controller
 
+import io.github.antistereov.orbitab.account.account.dto.AuthInfo
 import io.github.antistereov.orbitab.account.account.model.AccountDocument
 import io.github.antistereov.orbitab.account.account.service.AccountService
 import io.github.antistereov.orbitab.auth.service.AuthenticationService
@@ -9,7 +10,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping
+@RequestMapping("/account")
 class AccountController(
     private val accountService: AccountService,
     private val authenticationService: AuthenticationService,
@@ -39,19 +40,17 @@ class AccountController(
     }
 
     @GetMapping("/check")
-    suspend fun checkAuthentication(): ResponseEntity<Map<String, String>> {
+    suspend fun checkAuthentication(): ResponseEntity<AuthInfo> {
         logger.info { "Checking authentication" }
 
         return try {
             val accountId = authenticationService.getCurrentAccountId()
             val accountType = authenticationService.getCurrentAccountType()
-            ResponseEntity.ok(mapOf(
-                "status" to "authenticated",
-                "account_id" to accountId,
-                "account_type" to accountType.toString()
-            ))
+            ResponseEntity.ok(AuthInfo(accountId, accountType, true))
         } catch (ex: Exception) {
-            ResponseEntity.status(401).body(mapOf("status" to "unauthenticated"))
+            ResponseEntity.ok(
+                AuthInfo(null, null, false)
+            )
         }
     }
 }

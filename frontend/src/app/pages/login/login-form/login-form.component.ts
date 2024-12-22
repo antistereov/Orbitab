@@ -10,6 +10,7 @@ import {ButtonModule} from 'primeng/button';
 import {NgClass, NgIf} from '@angular/common';
 import {CardModule} from 'primeng/card';
 import {ProgressSpinnerModule} from 'primeng/progressspinner';
+import {TranslatePipe} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-login-form',
@@ -25,7 +26,8 @@ import {ProgressSpinnerModule} from 'primeng/progressspinner';
         NgClass,
         NgIf,
         CardModule,
-        ProgressSpinnerModule
+        ProgressSpinnerModule,
+        TranslatePipe
     ],
   templateUrl: './login-form.component.html',
   styleUrl: './login-form.component.scss'
@@ -48,7 +50,7 @@ export class LoginFormComponent {
     onSubmit() {
         if (this.form.valid) {
             this.loading = true;
-            this.authService.login(this.form.value)
+            this.authService.loginUser(this.form.value)
                 .subscribe({
                     next: (data: any) => {
                         this.router.navigate(['/']).then();

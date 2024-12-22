@@ -3,9 +3,9 @@ import {AvatarModule} from "primeng/avatar";
 import {ButtonModule} from "primeng/button";
 import {AsyncPipe, NgIf} from "@angular/common";
 import {Router} from '@angular/router';
-import {AuthService} from '../../../auth/auth.service';
-import {SettingsService} from '../settings.service';
-import {Observable} from 'rxjs';
+import {AuthService} from '../../../../auth/auth.service';
+import {SettingsService} from '../../settings.service';
+import {map, Observable} from 'rxjs';
 
 @Component({
   selector: 'app-user-settings',
@@ -29,7 +29,10 @@ export class UserSettingsComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.isLoggedIn$ = this.authService.isLoggedIn();
+        this.isLoggedIn$ = this.authService.authInfo$.pipe(
+            map(authInfo => {
+                return authInfo?.account_type == "REGISTERED"
+        }))
     }
 
     redirectToLogin() {
@@ -38,7 +41,7 @@ export class UserSettingsComponent implements OnInit {
     }
 
     logout() {
-        this.authService.logout().subscribe(() => {
+        this.authService.logout().then(() => {
             this.router.navigate(['/login']).then(() => window.location.reload());
         });
     }

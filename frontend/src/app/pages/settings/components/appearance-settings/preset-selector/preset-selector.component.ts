@@ -26,9 +26,6 @@ export class PresetSelectorComponent implements OnInit {
 
     ngOnInit() {
         this.presetSelectorService.preset$.subscribe((preset) => (this.selectedPreset = preset));
-        setTimeout(() => {
-            this.presetSelectorService.setPreset(this.selectedPreset);
-        }, 0);
     }
 
     onPresetChange(event: any) {
